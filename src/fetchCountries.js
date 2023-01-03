@@ -1,5 +1,4 @@
-// https://restcountries.com/v3.1/name/{name}
-// https://restcountries.com/v2/all?fields=name,capital,currencies
+
 
 const BASE_URL = "https://restcountries.com/v3.1";
 const fields = "fields=name,capital,population,flags,languages"
@@ -11,7 +10,7 @@ function fetchCountries(name){
         }
         return resp.json()
 
-    }).catch(err => console.log(err))
+    })
     return search
 }
 

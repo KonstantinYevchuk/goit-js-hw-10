@@ -12,48 +12,56 @@ const listEl = document.querySelector(".country-list");
 inputEl.addEventListener("input", debounce(inputName, DEBOUNCE_DELAY));
 inputEl.addEventListener("keydown", evt => {
     if(evt.key === "Backspace") {
-        listEl.innerHTML = "";
+        clearInput()
     }
 })
 
 function inputName(evt) {
+    clearInput()
+    const inputValue = evt.target.value.trim();
+    if(!inputValue) {
+        return
+    } else {
+        fetchCountries(evt.target.value.trim()).then(data => {
+            // console.log(data)
+            if(data.length === 1) {
+                createMurkup(data)
+            } else if(data.length <= 10) {
+                createMurkupShort(data)
+            } 
+            else {
+                Notiflix.Report.info("Too many matches found. Please enter a more specific name.");
+            } 
+                 
+        }).catch(err => {
+            Notiflix.Report.failure(new Error("Oops, there is no country with that name"));
+            console.log(err);
+        })
+    }
     
-    fetchCountries(evt.target.value.trim()).then(data => {
-        // console.log(data)
-        if(data.length < 10) {
-            createMurkup(data)
-        } else if(data.length >= 10) {
-            Notiflix.Report.info("Too many matches found. Please enter a more specific name.");
-        } 
-             
-    }).catch(err => {
-        Notiflix.Report.failure(new Error("Oops, there is no country with that name"));
-        console.log(err);
-    })
     
 }
 
 function createMurkup(arr) {
-    const markup = arr.map(({ flags: {svg}, name: {official}, capital, languages, population }) => {
-    
-    if(arr.length < 2) {
-       const list = `<li>
+    const markup = arr.map(({ flags: {svg}, name: {official}, capital, languages, population }) => 
+     `<li>
         <h2> <img src="${svg}" alt="flag"> ${official}</h2>
         <p><b>Capital:</b> ${capital}</p>
         <p><b>Languages:</b> ${Object.values(languages)}</p>
         <p><b>Population:</b> ${population}</p>
-        </li>`
-        return list
-    } else if(arr.length >= 2) {
-        const listEl = `<li>
-        <h2> <img src="${svg}" alt="flag"> ${official}</h2>
-        </li>`
-        return listEl
-    } 
-    }).join('')
+        </li>`).join('')
     
     listEl.insertAdjacentHTML('beforeend', markup)
 }
 
+function createMurkupShort(arr) {
+    const markup = arr.map(({flags: {svg}, name: {official}}) => 
+    `<li>
+    <h2> <img src="${svg}" alt="flag"> ${official}</h2>
+    </li>`).join('');
+    listEl.insertAdjacentHTML('beforeend', markup);
+}
 
-// fetchCountries("Peru").then(data => {console.log(data);})
+function clearInput() {
+    listEl.innerHTML = "";
+}
